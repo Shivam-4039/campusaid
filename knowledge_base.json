@@ -1,0 +1,50 @@
+{
+  "internal_exam": {
+    "title": "Internal Exam Policy",
+    "rules": [
+      "If a student misses an internal exam due to medical reasons, they must submit a medical certificate within 3 days.",
+      "A re-test will be conducted only after approval from the HOD.",
+      "Without medical proof, marks will be considered zero."
+    ]
+  },
+  "attendance": {
+    "title": "Attendance Policy",
+    "rules": [
+      "Minimum 75% attendance required to sit for semester exams.",
+      "Below 65% attendance requires special permission from the principal.",
+      "Attendance below 50% will result in automatic detention."
+    ]
+  },
+  "scholarship": {
+    "title": "Scholarship Policy",
+    "rules": [
+      "Merit scholarship requires minimum 8.0 CGPA.",
+      "Financial aid is available for students with family income below 2.5 LPA.",
+      "Students with any active backlog are NOT eligible for merit scholarship."
+    ]
+  },
+  "fee": {
+    "title": "Fee Policy",
+    "rules": [
+      "Semester fee must be paid before the 15th of the first month of each semester.",
+      "Late payment attracts a fine of Rs.50 per day.",
+      "Students facing financial hardship can apply for fee deferral through the principal's office."
+    ]
+  },
+  "hostel": {
+    "title": "Hostel Policy",
+    "rules": [
+      "Hostel students must return by 9:00 PM on weekdays.",
+      "Overnight absence requires written permission from parents and warden.",
+      "Hostel fee is separate from tuition fee and due on the 1st of every month."
+    ]
+  },
+  "grievance": {
+    "title": "Grievance Policy",
+    "rules": [
+      "Students can raise grievances through the Student Grievance Portal.",
+      "All grievances must be resolved within 7 working days.",
+      "If unresolved, students can escalate to the college ombudsman."
+    ]
+  }
+}
