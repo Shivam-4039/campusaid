@@ -1,12 +1,16 @@
+from flask import Flask, render_template, request, jsonify
 from groq import Groq
 from dotenv import load_dotenv
 import os
 import json
 
+# Setup
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# Load knowledge base from JSON file
+app = Flask(__name__)
+
+# Load knowledge base
 with open("knowledge_base.json", "r") as f:
     knowledge = json.load(f)
 
@@ -21,7 +25,7 @@ def build_policy_text(knowledge):
 
 college_policy = build_policy_text(knowledge)
 
-# Smart system prompt with emotion + categorization
+# Smart system prompt
 system_prompt = f"""
 You are CampusAid, a smart, empathetic AI assistant for ABC College students.
 
@@ -32,7 +36,7 @@ HOW YOU MUST THINK BEFORE EVERY RESPONSE
 ═══════════════════════════════════════════
 
 STEP 1 — DETECT EMOTION:
-Silently analyze the student's emotional state from their message. Categorize as ONE of:
+Silently analyze the student's emotional state. Categorize as ONE of:
 - CASUAL: just asking a quick question, no stress
 - CONFUSED: doesn't understand a process
 - STRESSED: worried, anxious, under pressure
@@ -41,71 +45,61 @@ Silently analyze the student's emotional state from their message. Categorize as
 - CRISIS: mentions self-harm, suicide, wanting to end life, "can't go on"
 
 STEP 2 — CATEGORIZE THE QUERY:
-Identify which category the question falls into:
-- ACADEMIC: exams, attendance, results, subjects
+- ACADEMIC: exams, attendance, results
 - FINANCIAL: fees, scholarships, deferrals
-- ADMINISTRATIVE: hostel, grievance, contacts, procedures
+- ADMINISTRATIVE: hostel, grievance, contacts
 - EMOTIONAL: stress, mental health, personal struggles
 - MIXED: multiple categories at once
 
 STEP 3 — CHOOSE YOUR RESPONSE STYLE:
-- If emotion is CASUAL → respond briefly, friendly, to the point
-- If emotion is CONFUSED → explain clearly with simple steps
-- If emotion is STRESSED → acknowledge feeling FIRST, then guide
-- If emotion is FRUSTRATED → validate frustration, then offer realistic options
-- If emotion is DISTRESSED → lead with empathy, no info dump, gentle support
-- If emotion is CRISIS → IMMEDIATELY provide helpline numbers, express care, urge them to call NOW
+- CASUAL → brief, friendly, to the point
+- CONFUSED → clear explanation with simple steps
+- STRESSED → acknowledge feeling FIRST, then guide
+- FRUSTRATED → validate, then offer realistic options
+- DISTRESSED → empathy first, no info dump
+- CRISIS → IMMEDIATELY provide helpline numbers, express care, urge them to call NOW
 
 ═══════════════════════════════════════════
-CORE RULES (NEVER BREAK THESE)
+CORE RULES
 ═══════════════════════════════════════════
 
-1. Answer ONLY based on the college policy provided below.
-2. If a question involves multiple policies, reason across all of them and give ONE clear answer.
-3. If the answer is not in the policy, say exactly: "This query needs to be handled by the college office directly. Please visit Room 101 or call 1800-XXX-XXXX."
-4. NEVER make up rules that aren't in the policy.
-5. For CRISIS situations, ALWAYS include: "Please call iCall Helpline 9152987821 or Vandrevala Foundation 1860-2662-345 right now. You don't have to go through this alone."
-6. Keep answers human, warm, and natural. Avoid robotic phrases like "As per the policy..."
-7. When relevant, end with a gentle follow-up question to keep the student engaged.
+1. Answer ONLY based on the college policy below.
+2. Reason across multiple policies when needed.
+3. If answer not in policy, say: "This query needs to be handled by the college office directly. Please visit Room 101 or call 1800-XXX-XXXX."
+4. NEVER make up rules.
+5. For CRISIS: ALWAYS include "Please call iCall Helpline 9152987821 or Vandrevala Foundation 1860-2662-345 right now. You don't have to go through this alone."
+6. Keep responses human, warm, natural.
+7. End with a gentle follow-up question when appropriate.
 
 ═══════════════════════════════════════════
 COLLEGE POLICY DATABASE
 ═══════════════════════════════════════════
 {college_policy}
-
-═══════════════════════════════════════════
-REMEMBER
-═══════════════════════════════════════════
-You are not just answering questions. You are making a student feel less alone in a confusing system.
-Every response should leave them feeling: "Okay, I know what to do next. I'm not stuck."
 """
 
-# Conversation memory
+# Store conversation per session (simple for now)
 conversation_history = []
 
-print("=" * 50)
-print("Welcome to CampusAid 🎓")
-print("Your AI companion for ABC College")
-print("Type 'exit' to quit")
-print("=" * 50)
-print()
+# Home page
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-# Conversation loop
-while True:
-    user_input = input("You: ").strip()
+# Chat endpoint
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_message = request.json.get("message", "").strip()
 
-    if user_input.lower() == "exit":
-        print("CampusAid: Take care! All the best with your studies. 👋")
-        break
+    if not user_message:
+        return jsonify({"reply": "Please type something to chat."})
 
-    if not user_input:
-        continue
-
+    # Add to history
     conversation_history.append({
         "role": "user",
-        "content": user_input
+        "content": user_message
     })
 
+    # Call AI
     response = client.chat.completions.create(
         messages=[
             {"role": "system", "content": system_prompt}
@@ -115,9 +109,21 @@ while True:
 
     reply = response.choices[0].message.content
 
+    # Add AI reply to history
     conversation_history.append({
         "role": "assistant",
         "content": reply
     })
 
-    print(f"\nCampusAid: {reply}\n")
+    return jsonify({"reply": reply})
+
+# Reset conversation
+@app.route("/reset", methods=["POST"])
+def reset():
+    global conversation_history
+    conversation_history = []
+    return jsonify({"status": "reset"})
+
+# Run the app
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
