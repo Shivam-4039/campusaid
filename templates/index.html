@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +27,7 @@
             height: 90vh;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -46,7 +47,7 @@
         }
 
         .chat-header button {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
             padding: 6px 12px;
@@ -124,8 +125,61 @@
             color: #6b7280;
             font-size: 13px;
         }
+
+        .upload-area {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .upload-btn {
+            background: #f3f4f6;
+            color: #2563eb;
+            border: 1px solid #d1d5db;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .upload-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .doc-info {
+            flex: 1;
+            color: #6b7280;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .doc-active {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .remove-doc {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+        }
+
+        .remove-doc:hover {
+            background: #fee2e2;
+            border-radius: 4px;
+        }
     </style>
 </head>
+
 <body>
     <div class="chat-container">
         <div class="chat-header">
@@ -133,9 +187,17 @@
             <button onclick="resetChat()">New Chat</button>
         </div>
 
+        <div class="upload-area">
+            <input type="file" id="fileInput" accept=".pdf" style="display:none" onchange="uploadFile()">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📎 Upload PDF</button>
+            <div class="doc-info" id="docInfo">No document attached</div>
+            <button class="remove-doc" id="removeBtn" onclick="removeDocument()" style="display:none">✕</button>
+        </div>
+
         <div class="chat-messages" id="messages">
             <div class="message bot">
-                Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships, hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
+                Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships,
+                hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
             </div>
         </div>
 
@@ -203,11 +265,60 @@
         function handleEnter(event) {
             if (event.key === "Enter") sendMessage();
         }
+        async function uploadFile() {
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+            const docInfo = document.getElementById("docInfo");
+            const removeBtn = document.getElementById("removeBtn");
 
+            if (!file) return;
+
+            docInfo.textContent = "Reading your document...";
+            docInfo.classList.remove("doc-active");
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch("/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    docInfo.textContent = `📄 ${data.filename}`;
+                    docInfo.classList.add("doc-active");
+                    removeBtn.style.display = "inline";
+                    addMessage(data.message, "bot");
+                } else {
+                    docInfo.textContent = "No document attached";
+                    addMessage("⚠️ " + data.message, "bot");
+                }
+            } catch (error) {
+                docInfo.textContent = "No document attached";
+                addMessage("Oops, couldn't upload the file. Try again.", "bot");
+            }
+
+            fileInput.value = "";
+        }
+
+        async function removeDocument() {
+            await fetch("/remove_document", { method: "POST" });
+            document.getElementById("docInfo").textContent = "No document attached";
+            document.getElementById("docInfo").classList.remove("doc-active");
+            document.getElementById("removeBtn").style.display = "none";
+            addMessage("Document removed. We're back to general college queries.", "bot");
+        }
         async function resetChat() {
             await fetch("/reset", { method: "POST" });
             messagesDiv.innerHTML = '<div class="message bot">Hi! I\'m CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships, hostel, or just talk to me if you\'re feeling stressed. I\'m here for you. 💙</div>';
+            document.getElementById("docInfo").textContent = "No document attached";
+            document.getElementById("docInfo").classList.remove("doc-active");
+            document.getElementById("removeBtn").style.display = "none";
         }
     </script>
 </body>
+
 </html>
