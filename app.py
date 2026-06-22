@@ -133,8 +133,7 @@ COLLEGE POLICY DATABASE
 """
 
 # Store conversation per session (simple for now)
-conversation_history = []
-uploaded_document = {"name": None, "content": None}
+# No longer using global state - frontend manages chats now
 
 # Home page
 @app.route("/")
@@ -144,7 +143,10 @@ def home():
 # Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_message = request.json.get("message", "").strip()
+    data = request.json
+    user_message = data.get("message", "").strip()
+    history = data.get("history", [])
+    document = data.get("document", None)
 
     if not user_message:
         return jsonify({"reply": "Please type something to chat."})
@@ -152,15 +154,15 @@ def chat():
     # Build dynamic system prompt
     current_prompt = system_prompt
 
-    # If a document is uploaded, attach it to the context
-    if uploaded_document["content"]:
+    # If a document is attached to this chat, add it to context
+    if document and document.get("content"):
         current_prompt += f"""
 
 ═══════════════════════════════════════════
 🔴 STUDENT'S UPLOADED DOCUMENT — TOP PRIORITY 🔴
 ═══════════════════════════════════════════
 
-The student has uploaded a document titled: "{uploaded_document['name']}"
+The student has uploaded a document titled: "{document['name']}"
 
 CRITICAL RULES FOR HANDLING UPLOADED DOCUMENT:
 
@@ -176,37 +178,28 @@ CRITICAL RULES FOR HANDLING UPLOADED DOCUMENT:
 
 DOCUMENT CONTENT BELOW:
 ─────────────────────────────────────────
-{uploaded_document['content'][:8000]}
+{document['content'][:8000]}
 ─────────────────────────────────────────
 END OF DOCUMENT CONTENT
 """
 
-    conversation_history.append({
-        "role": "user",
-        "content": user_message
-    })
+    # Build message list with history from frontend
+    messages = [{"role": "system", "content": current_prompt}]
+    messages.extend(history)
+    messages.append({"role": "user", "content": user_message})
 
     response = client.chat.completions.create(
-        messages=[
-            {"role": "system", "content": current_prompt}
-        ] + conversation_history,
+        messages=messages,
         model="llama-3.1-8b-instant"
     )
 
     reply = response.choices[0].message.content
-
-    conversation_history.append({
-        "role": "assistant",
-        "content": reply
-    })
 
     return jsonify({"reply": reply})
 
 # Upload PDF endpoint
 @app.route("/upload", methods=["POST"])
 def upload():
-    global uploaded_document
-
     if "file" not in request.files:
         return jsonify({"status": "error", "message": "No file uploaded"})
 
@@ -227,31 +220,24 @@ def upload():
         if not text.strip():
             return jsonify({"status": "error", "message": "Could not read text from this PDF"})
 
-        uploaded_document["name"] = file.filename
-        uploaded_document["content"] = text.strip()
-
         return jsonify({
             "status": "success",
             "message": f"Got it! I've read '{file.filename}'. Ask me anything about it.",
-            "filename": file.filename
+            "filename": file.filename,
+            "content": text.strip()
         })
     except Exception as e:
         return jsonify({"status": "error", "message": f"Error reading PDF: {str(e)}"})
 
 
-# Remove uploaded document
 @app.route("/remove_document", methods=["POST"])
 def remove_document():
-    global uploaded_document
-    uploaded_document = {"name": None, "content": None}
+    # Document management now handled by frontend
     return jsonify({"status": "removed"})
 
-# Reset conversation
 @app.route("/reset", methods=["POST"])
 def reset():
-    global conversation_history, uploaded_document
-    conversation_history = []
-    uploaded_document = {"name": None, "content": None}
+    # Chat management now handled by frontend
     return jsonify({"status": "reset"})
 
 # Run the app

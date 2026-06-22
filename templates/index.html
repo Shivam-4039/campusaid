@@ -15,22 +15,121 @@
 
         body {
             background: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .chat-container {
-            width: 100%;
-            max-width: 600px;
-            height: 90vh;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: #1f2937;
+            color: white;
             display: flex;
             flex-direction: column;
+            border-right: 1px solid #374151;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #374151;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .new-chat-btn:hover {
+            background: #1e40af;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: #d1d5db;
+            transition: background 0.15s;
+        }
+
+        .chat-item:hover {
+            background: #374151;
+        }
+
+        .chat-item.active {
+            background: #374151;
+            color: white;
+        }
+
+        .chat-title {
+            flex: 1;
+            white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 8px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .chat-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            color: #ef4444;
+        }
+
+        .empty-state {
+            color: #6b7280;
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        .sidebar-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #374151;
+            font-size: 11px;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        /* MAIN CHAT AREA */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
         }
 
         .chat-header {
@@ -46,14 +145,56 @@
             font-size: 18px;
         }
 
-        .chat-header button {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
+        .upload-area {
+            padding: 8px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .upload-btn {
+            background: white;
+            color: #2563eb;
+            border: 1px solid #d1d5db;
             padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
+            font-size: 13px;
+        }
+
+        .upload-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .doc-info {
+            flex: 1;
+            color: #6b7280;
             font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .doc-active {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .remove-doc {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 6px;
+        }
+
+        .remove-doc:hover {
+            background: #fee2e2;
+            border-radius: 4px;
         }
 
         .chat-messages {
@@ -66,10 +207,10 @@
         }
 
         .message {
-            max-width: 80%;
+            max-width: 75%;
             padding: 10px 14px;
             border-radius: 12px;
-            line-height: 1.4;
+            line-height: 1.5;
             white-space: pre-wrap;
         }
 
@@ -81,13 +222,13 @@
 
         .message.bot {
             align-self: flex-start;
-            background: #e5e7eb;
+            background: #f1f5f9;
             color: #111;
         }
 
         .chat-input {
             display: flex;
-            padding: 12px;
+            padding: 12px 16px;
             border-top: 1px solid #e5e7eb;
             gap: 8px;
         }
@@ -125,102 +266,202 @@
             color: #6b7280;
             font-size: 13px;
         }
-
-        .upload-area {
-            padding: 8px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
-
-        .upload-btn {
-            background: #f3f4f6;
-            color: #2563eb;
-            border: 1px solid #d1d5db;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-
-        .upload-btn:hover {
-            background: #e5e7eb;
-        }
-
-        .doc-info {
-            flex: 1;
-            color: #6b7280;
-            font-size: 12px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .doc-active {
-            color: #059669;
-            font-weight: 500;
-        }
-
-        .remove-doc {
-            background: none;
-            border: none;
-            color: #dc2626;
-            cursor: pointer;
-            font-size: 12px;
-            padding: 2px 6px;
-        }
-
-        .remove-doc:hover {
-            background: #fee2e2;
-            border-radius: 4px;
-        }
     </style>
 </head>
 
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h2>CampusAid 🎓 — ABC College</h2>
-            <button onclick="resetChat()">New Chat</button>
-        </div>
+    <div class="app">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="createNewChat()">+ New Chat</button>
+            </div>
 
-        <div class="upload-area">
-            <input type="file" id="fileInput" accept=".pdf" style="display:none" onchange="uploadFile()">
-            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📎 Upload PDF</button>
-            <div class="doc-info" id="docInfo">No document attached</div>
-            <button class="remove-doc" id="removeBtn" onclick="removeDocument()" style="display:none">✕</button>
-        </div>
+            <div class="chat-list" id="chatList">
+                <div class="empty-state">No chats yet. Start a conversation!</div>
+            </div>
 
-        <div class="chat-messages" id="messages">
-            <div class="message bot">
-                Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships,
-                hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
+            <div class="sidebar-footer">
+                CampusAid 🎓 v1.0
             </div>
         </div>
 
-        <div class="chat-input">
-            <input type="text" id="userInput" placeholder="Type your message..." onkeypress="handleEnter(event)">
-            <button id="sendBtn" onclick="sendMessage()">Send</button>
+        <!-- MAIN CHAT AREA -->
+        <div class="main">
+            <div class="chat-header">
+                <h2>CampusAid 🎓 — ABC College</h2>
+            </div>
+
+            <div class="upload-area">
+                <input type="file" id="fileInput" accept=".pdf" style="display:none" onchange="uploadFile()">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📎 Upload PDF</button>
+                <div class="doc-info" id="docInfo">No document attached</div>
+                <button class="remove-doc" id="removeBtn" onclick="removeDocument()" style="display:none">✕</button>
+            </div>
+
+            <div class="chat-messages" id="messages">
+                <div class="message bot">
+                    Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees,
+                    scholarships, hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="Type your message..." onkeypress="handleEnter(event)">
+                <button id="sendBtn" onclick="sendMessage()">Send</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const messagesDiv = document.getElementById("messages");
-        const userInput = document.getElementById("userInput");
-        const sendBtn = document.getElementById("sendBtn");
+        // ─────────────────────────────────────────
+        // CHAT STATE MANAGEMENT (using localStorage)
+        // ─────────────────────────────────────────
 
-        function addMessage(text, sender) {
+        let chats = JSON.parse(localStorage.getItem("campusaid_chats") || "[]");
+        let currentChatId = null;
+
+        function saveChats() {
+            localStorage.setItem("campusaid_chats", JSON.stringify(chats));
+        }
+
+        function generateId() {
+            return Date.now().toString();
+        }
+
+        function getCurrentChat() {
+            return chats.find(c => c.id === currentChatId);
+        }
+
+        // ─────────────────────────────────────────
+        // SIDEBAR RENDERING
+        // ─────────────────────────────────────────
+
+        function renderSidebar() {
+            const list = document.getElementById("chatList");
+
+            if (chats.length === 0) {
+                list.innerHTML = '<div class="empty-state">No chats yet. Start a conversation!</div>';
+                return;
+            }
+
+            list.innerHTML = "";
+            chats.forEach(chat => {
+                const item = document.createElement("div");
+                item.className = "chat-item" + (chat.id === currentChatId ? " active" : "");
+                item.innerHTML = `
+                    <div class="chat-title" onclick="loadChat('${chat.id}')">${chat.title}</div>
+                    <button class="delete-btn" onclick="deleteChat('${chat.id}', event)">🗑</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // ─────────────────────────────────────────
+        // CHAT OPERATIONS
+        // ─────────────────────────────────────────
+
+        function createNewChat() {
+            const newChat = {
+                id: generateId(),
+                title: "New Chat",
+                messages: [],
+                document: null
+            };
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveChats();
+            renderSidebar();
+            renderMessages();
+            updateDocumentUI();
+        }
+
+        function loadChat(chatId) {
+            currentChatId = chatId;
+            renderSidebar();
+            renderMessages();
+            updateDocumentUI();
+        }
+
+        function deleteChat(chatId, event) {
+            event.stopPropagation();
+            if (!confirm("Delete this chat?")) return;
+
+            chats = chats.filter(c => c.id !== chatId);
+
+            if (currentChatId === chatId) {
+                currentChatId = chats.length > 0 ? chats[0].id : null;
+            }
+
+            saveChats();
+            renderSidebar();
+            renderMessages();
+            updateDocumentUI();
+        }
+
+        // ─────────────────────────────────────────
+        // MESSAGE RENDERING
+        // ─────────────────────────────────────────
+
+        function renderMessages() {
+            const messagesDiv = document.getElementById("messages");
+            const chat = getCurrentChat();
+
+            if (!chat) {
+                messagesDiv.innerHTML = `
+                    <div class="message bot">
+                        Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships, hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
+                    </div>
+                `;
+                return;
+            }
+
+            if (chat.messages.length === 0) {
+                messagesDiv.innerHTML = `
+                    <div class="message bot">
+                        Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships, hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
+                    </div>
+                `;
+                return;
+            }
+
+            messagesDiv.innerHTML = "";
+            chat.messages.forEach(msg => {
+                addMessageToDOM(msg.content, msg.role === "user" ? "user" : "bot");
+            });
+        }
+
+        function addMessageToDOM(text, sender) {
+            const messagesDiv = document.getElementById("messages");
             const msg = document.createElement("div");
             msg.className = "message " + sender;
-            msg.textContent = text;
+            msg.innerHTML = formatMessage(text);
             messagesDiv.appendChild(msg);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
+        function formatMessage(text) {
+            // Escape HTML to prevent injection
+            text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            // Convert markdown to HTML
+            // Bold: **text** → <strong>text</strong>
+            text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+            // Italic: *text* → <em>text</em>
+            text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
+
+            // Bullet points: - text → • text
+            text = text.replace(/^- (.+)$/gm, "• $1");
+
+            // Line breaks
+            text = text.replace(/\n/g, "<br>");
+
+            return text;
+        }
+
         function showTyping() {
+            const messagesDiv = document.getElementById("messages");
             const typing = document.createElement("div");
             typing.className = "message bot typing";
             typing.id = "typing";
@@ -234,11 +475,34 @@
             if (typing) typing.remove();
         }
 
+        // ─────────────────────────────────────────
+        // SEND MESSAGE
+        // ─────────────────────────────────────────
+
         async function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const sendBtn = document.getElementById("sendBtn");
             const text = userInput.value.trim();
             if (!text) return;
 
-            addMessage(text, "user");
+            // Create new chat if none active
+            if (!currentChatId) {
+                createNewChat();
+            }
+
+            const chat = getCurrentChat();
+
+            // If first message, use it as chat title (truncated)
+            if (chat.messages.length === 0) {
+                chat.title = text.length > 30 ? text.substring(0, 30) + "..." : text;
+                renderSidebar();
+            }
+
+            // Add user message
+            chat.messages.push({ role: "user", content: text });
+            addMessageToDOM(text, "user");
+            saveChats();
+
             userInput.value = "";
             sendBtn.disabled = true;
             showTyping();
@@ -247,15 +511,23 @@
                 const response = await fetch("/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({
+                        message: text,
+                        history: chat.messages.slice(0, -1),
+                        document: chat.document
+                    })
                 });
 
                 const data = await response.json();
                 removeTyping();
-                addMessage(data.reply, "bot");
+                addMessageToDOM(data.reply, "bot");
+
+                // Save bot reply
+                chat.messages.push({ role: "assistant", content: data.reply });
+                saveChats();
             } catch (error) {
                 removeTyping();
-                addMessage("Oops, something went wrong. Try again.", "bot");
+                addMessageToDOM("Oops, something went wrong. Try again.", "bot");
             }
 
             sendBtn.disabled = false;
@@ -265,13 +537,23 @@
         function handleEnter(event) {
             if (event.key === "Enter") sendMessage();
         }
+
+        // ─────────────────────────────────────────
+        // DOCUMENT UPLOAD
+        // ─────────────────────────────────────────
+
         async function uploadFile() {
             const fileInput = document.getElementById("fileInput");
             const file = fileInput.files[0];
+            if (!file) return;
+
+            // Create new chat if none active
+            if (!currentChatId) {
+                createNewChat();
+            }
+
             const docInfo = document.getElementById("docInfo");
             const removeBtn = document.getElementById("removeBtn");
-
-            if (!file) return;
 
             docInfo.textContent = "Reading your document...";
             docInfo.classList.remove("doc-active");
@@ -288,36 +570,69 @@
                 const data = await response.json();
 
                 if (data.status === "success") {
+                    const chat = getCurrentChat();
+                    chat.document = {
+                        name: data.filename,
+                        content: data.content
+                    };
+                    saveChats();
+
                     docInfo.textContent = `📄 ${data.filename}`;
                     docInfo.classList.add("doc-active");
                     removeBtn.style.display = "inline";
-                    addMessage(data.message, "bot");
+                    addMessageToDOM(data.message, "bot");
+
+                    chat.messages.push({ role: "assistant", content: data.message });
+                    saveChats();
                 } else {
                     docInfo.textContent = "No document attached";
-                    addMessage("⚠️ " + data.message, "bot");
+                    addMessageToDOM("⚠️ " + data.message, "bot");
                 }
             } catch (error) {
                 docInfo.textContent = "No document attached";
-                addMessage("Oops, couldn't upload the file. Try again.", "bot");
+                addMessageToDOM("Oops, couldn't upload the file. Try again.", "bot");
             }
 
             fileInput.value = "";
         }
 
-        async function removeDocument() {
-            await fetch("/remove_document", { method: "POST" });
-            document.getElementById("docInfo").textContent = "No document attached";
-            document.getElementById("docInfo").classList.remove("doc-active");
-            document.getElementById("removeBtn").style.display = "none";
-            addMessage("Document removed. We're back to general college queries.", "bot");
+        function removeDocument() {
+            const chat = getCurrentChat();
+            if (!chat) return;
+
+            chat.document = null;
+            saveChats();
+            updateDocumentUI();
+            addMessageToDOM("Document removed. We're back to general college queries.", "bot");
         }
-        async function resetChat() {
-            await fetch("/reset", { method: "POST" });
-            messagesDiv.innerHTML = '<div class="message bot">Hi! I\'m CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships, hostel, or just talk to me if you\'re feeling stressed. I\'m here for you. 💙</div>';
-            document.getElementById("docInfo").textContent = "No document attached";
-            document.getElementById("docInfo").classList.remove("doc-active");
-            document.getElementById("removeBtn").style.display = "none";
+
+        function updateDocumentUI() {
+            const chat = getCurrentChat();
+            const docInfo = document.getElementById("docInfo");
+            const removeBtn = document.getElementById("removeBtn");
+
+            if (chat && chat.document) {
+                docInfo.textContent = `📄 ${chat.document.name}`;
+                docInfo.classList.add("doc-active");
+                removeBtn.style.display = "inline";
+            } else {
+                docInfo.textContent = "No document attached";
+                docInfo.classList.remove("doc-active");
+                removeBtn.style.display = "none";
+            }
         }
+
+        // ─────────────────────────────────────────
+        // INITIALIZE ON PAGE LOAD
+        // ─────────────────────────────────────────
+
+        window.onload = function () {
+            // Start fresh on page load - user clicks a chat or starts a new one
+            currentChatId = null;
+            renderSidebar();
+            renderMessages();
+            updateDocumentUI();
+        };
     </script>
 </body>
 
