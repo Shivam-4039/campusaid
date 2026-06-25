@@ -3,6 +3,7 @@ from groq import Groq
 from dotenv import load_dotenv
 import os
 import json
+import glob
 from PyPDF2 import PdfReader
 
 # Setup
@@ -11,24 +12,34 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = Flask(__name__)
 
-# Load knowledge base
-with open("knowledge_base.json", "r") as f:
-    knowledge = json.load(f)
+# Load all colleges from /colleges folder
+def load_all_colleges():
+    colleges = {}
+    college_files = glob.glob("colleges/*.json")
+    for filepath in college_files:
+        with open(filepath, "r", encoding="utf-8") as f:
+            college_data = json.load(f)
+            colleges[college_data["id"]] = college_data
+    return colleges
 
-# Convert JSON to readable policy text
-def build_policy_text(knowledge):
+# Convert a college's policies into readable text for the AI
+def build_policy_text(college_data):
     policy_text = ""
-    for key, section in knowledge.items():
+    policies = college_data.get("policies", {})
+    for key, section in policies.items():
         policy_text += f"\n{section['title'].upper()} (category: {section['category']}):\n"
         for rule in section['rules']:
             policy_text += f"- {rule}\n"
     return policy_text
 
-college_policy = build_policy_text(knowledge)
+# Build a system prompt for a specific college
+def build_system_prompt(college_data):
+    college_policy = build_policy_text(college_data)
+    college_name = college_data.get("name", "the College")
+    office_contact = college_data.get("office_contact", "the college office")
 
-# Smart system prompt
-system_prompt = f"""
-You are CampusAid, a digital senior at ABC College who genuinely cares about students.
+    return f"""
+You are CampusAid, a digital senior at {college_name} who genuinely cares about students.
 
 You are NOT a chatbot. You are NOT a search engine. You are NOT a help desk.
 
@@ -96,7 +107,7 @@ NEVER write words like CASUAL, STRESSED, EMOTIONAL, CRISIS, ACADEMIC, FINANCIAL 
 
 RULE 7 — POLICY HONESTY:
 Answer ONLY based on the college policy below.
-If a question is outside the policy, say: "This needs to be handled by the college office directly. Visit Room 101 or call 1800-XXX-XXXX. I can help you prep what to ask, if you want."
+If a question is outside the policy, say: "This needs to be handled by the college office directly. {office_contact}. I can help you prep what to ask, if you want."
 NEVER make up rules.
 
 RULE 8 — CRISIS PROTOCOL (NON-NEGOTIABLE):
@@ -127,10 +138,19 @@ Every response should leave them feeling ONE of these:
 3. "Someone gets it."
 
 ═══════════════════════════════════════════
-COLLEGE POLICY DATABASE
+{college_name.upper()} POLICY DATABASE
 ═══════════════════════════════════════════
 {college_policy}
 """
+
+# Load all colleges once at startup
+COLLEGES = load_all_colleges()
+
+# Pre-build system prompts for each college (efficient — no rebuilding per request)
+SYSTEM_PROMPTS = {college_id: build_system_prompt(college_data) for college_id, college_data in COLLEGES.items()}
+
+# Default college (used when none specified)
+DEFAULT_COLLEGE = "abc_college"
 
 # Store conversation per session (simple for now)
 # No longer using global state - frontend manages chats now
@@ -141,18 +161,20 @@ def home():
     return render_template("index.html")
 
 # Chat endpoint
+# Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
     user_message = data.get("message", "").strip()
     history = data.get("history", [])
     document = data.get("document", None)
+    college_id = data.get("college_id", DEFAULT_COLLEGE)
 
     if not user_message:
         return jsonify({"reply": "Please type something to chat."})
 
-    # Build dynamic system prompt
-    current_prompt = system_prompt
+    # Get the system prompt for the selected college
+    current_prompt = SYSTEM_PROMPTS.get(college_id, SYSTEM_PROMPTS[DEFAULT_COLLEGE])
 
     # If a document is attached to this chat, add it to context
     if document and document.get("content"):
@@ -234,6 +256,19 @@ def upload():
 def remove_document():
     # Document management now handled by frontend
     return jsonify({"status": "removed"})
+
+    # Get list of available colleges
+@app.route("/colleges", methods=["GET"])
+def get_colleges():
+    colleges_list = []
+    for college_id, data in COLLEGES.items():
+        colleges_list.append({
+            "id": college_id,
+            "name": data.get("name", "Unknown"),
+            "tagline": data.get("tagline", ""),
+            "colors": data.get("colors", {"primary": "#2563eb", "primary_dark": "#1e40af"})
+        })
+    return jsonify({"colleges": colleges_list})
 
 @app.route("/reset", methods=["POST"])
 def reset():
