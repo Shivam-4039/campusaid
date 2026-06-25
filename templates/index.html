@@ -345,6 +345,86 @@
             margin-top: 4px;
             padding: 0 8px;
         }
+
+        .suggestions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .suggestions-title {
+            color: #6b7280;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .suggestion-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .suggestion-card:hover {
+            border-color: #2563eb;
+            background: #f0f7ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .suggestion-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .suggestion-text {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .welcome-state {
+            text-align: center;
+            padding: 32px 20px 16px;
+        }
+
+        .welcome-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .welcome-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .welcome-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
     </style>
 </head>
 
@@ -488,12 +568,41 @@
 
             if (!chat || chat.messages.length === 0) {
                 messagesDiv.innerHTML = `
-            <div class="message-wrapper bot">
-                <div class="message bot">
-                    Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees, scholarships, hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
+        <div class="welcome-state">
+            <div class="welcome-icon">🎓</div>
+            <div class="welcome-title">Hey there! I'm CampusAid</div>
+            <div class="welcome-subtitle">Your AI companion for college life. Ask me about exams, fees, scholarships, or just talk to me if you're stressed. I'm here for you. 💙</div>
+        </div>
+        <div class="suggestions-container">
+            <div class="suggestions-title">Try one of these to get started:</div>
+            <div class="suggestions-grid">
+                <div class="suggestion-card" onclick="sendSuggestion('When is the fee deadline?')">
+                    <span class="suggestion-icon">📅</span>
+                    <span class="suggestion-text">When is the fee deadline?</span>
+                </div>
+                <div class="suggestion-card" onclick="sendSuggestion('How do I apply for a scholarship?')">
+                    <span class="suggestion-icon">🎓</span>
+                    <span class="suggestion-text">How do I apply for a scholarship?</span>
+                </div>
+                <div class="suggestion-card" onclick="sendSuggestion('What are the attendance rules?')">
+                    <span class="suggestion-icon">📊</span>
+                    <span class="suggestion-text">What are the attendance rules?</span>
+                </div>
+                <div class="suggestion-card" onclick="sendSuggestion('I am feeling stressed about my exams')">
+                    <span class="suggestion-icon">😓</span>
+                    <span class="suggestion-text">I'm stressed about my exams</span>
+                </div>
+                <div class="suggestion-card" onclick="sendSuggestion('Help me write a fee deferral letter')">
+                    <span class="suggestion-icon">✍️</span>
+                    <span class="suggestion-text">Help me write a fee deferral letter</span>
+                </div>
+                <div class="suggestion-card" onclick="sendSuggestion('What if I miss an internal exam due to illness?')">
+                    <span class="suggestion-icon">🏥</span>
+                    <span class="suggestion-text">Missed exam due to illness</span>
                 </div>
             </div>
-        `;
+        </div>
+    `;
                 return;
             }
 
@@ -505,6 +614,11 @@
                     msg.timestamp || null
                 );
             });
+        }
+
+        function sendSuggestion(text) {
+            document.getElementById("userInput").value = text;
+            sendMessage();
         }
 
         function addMessageToDOM(text, sender, timestamp = null) {
@@ -588,10 +702,13 @@
 
             const chat = getCurrentChat();
 
-            // If first message, use it as chat title (truncated)
-            if (chat.messages.length === 0) {
-                chat.title = text.length > 30 ? text.substring(0, 30) + "..." : text;
+            // If first message, generate AI title
+            const isFirstMessage = chat.messages.length === 0;
+            if (isFirstMessage) {
+                chat.title = "New Chat";
                 renderSidebar();
+                // Generate AI title in background
+                generateChatTitle(text, chat);
             }
 
             // Add user message
@@ -630,6 +747,24 @@
 
             sendBtn.disabled = false;
             userInput.focus();
+        }
+        async function generateChatTitle(firstMessage, chat) {
+            try {
+                const response = await fetch("/generate_title", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: firstMessage })
+                });
+                const data = await response.json();
+                chat.title = data.title || "New Chat";
+                saveChats();
+                renderSidebar();
+            } catch (error) {
+                // Fall back to truncated message if title generation fails
+                chat.title = firstMessage.length > 30 ? firstMessage.substring(0, 30) + "..." : firstMessage;
+                saveChats();
+                renderSidebar();
+            }
         }
 
         function handleEnter(event) {

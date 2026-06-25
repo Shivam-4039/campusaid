@@ -161,7 +161,35 @@ def home():
     return render_template("index.html")
 
 # Chat endpoint
-# Chat endpoint
+# Generate a short title for a conversation
+@app.route("/generate_title", methods=["POST"])
+def generate_title():
+    data = request.json
+    user_message = data.get("message", "").strip()
+
+    if not user_message:
+        return jsonify({"title": "New Chat"})
+
+    try:
+        response = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a title generator. Generate a SHORT (3-5 words max) descriptive title for a conversation that starts with the user's message. Return ONLY the title text, no quotes, no punctuation at the end. Examples: 'Fee Deferral Help', 'Exam Stress Support', 'Scholarship Application', 'Hostel Rules Query', 'Missed Exam Issue'."
+                },
+                {
+                    "role": "user",
+                    "content": f"Generate a title for a conversation starting with: \"{user_message}\""
+                }
+            ],
+            model="llama-3.1-8b-instant",
+            max_tokens=20
+        )
+
+        title = response.choices[0].message.content.strip().strip('"').strip("'")
+        return jsonify({"title": title or "New Chat"})
+    except Exception as e:
+        return jsonify({"title": "New Chat"})
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
