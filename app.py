@@ -5,6 +5,7 @@ import os
 import json
 import glob
 from PyPDF2 import PdfReader
+from admin import register_admin_routes
 
 # Setup
 load_dotenv()
@@ -303,6 +304,15 @@ def reset():
     # Chat management now handled by frontend
     return jsonify({"status": "reset"})
 
+# Register admin routes from admin.py
+register_admin_routes(
+    app,
+    client,
+    COLLEGES,
+    SYSTEM_PROMPTS,
+    build_system_prompt,
+    load_all_colleges
+)
 # Run the app
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

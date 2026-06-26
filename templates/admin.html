@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - {{ college.name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-left h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background: #f3f4f6;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .header-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .header-btn.primary {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .header-btn.primary:hover {
+            background: #1e40af;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .stat-meta {
+            font-size: 12px;
+            color: #10b981;
+            margin-top: 4px;
+        }
+
+        /* SECTION TITLES */
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* UPLOAD ZONE */
+        .upload-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 30px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 10px;
+            padding: 50px 30px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragging {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .upload-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .upload-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 8px;
+        }
+
+        /* PROCESSING STATE */
+        .processing {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .processing-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .processing-text {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* REVIEW SECTION */
+        .review-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 30px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .review-meta {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .review-meta strong {
+            color: #10b981;
+        }
+
+        .policy-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+
+        .policy-card.discarded {
+            opacity: 0.4;
+            background: #fee2e2;
+        }
+
+        .policy-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .policy-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+            flex: 1;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .category-academic {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .category-financial {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .category-administrative {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .category-emotional {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+
+        .policy-rules {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .policy-rules li {
+            padding: 6px 0 6px 18px;
+            position: relative;
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .policy-rules li::before {
+            content: "•";
+            position: absolute;
+            left: 6px;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .policy-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .policy-action-btn {
+            background: white;
+            border: 1px solid #d1d5db;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .policy-action-btn:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .policy-action-btn.danger:hover {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+
+        /* CURRENT POLICIES SECTION */
+        .current-policies {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .policy-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .policy-item:last-child {
+            border-bottom: none;
+        }
+
+        .policy-item-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .policy-item-meta {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        /* NOTIFICATIONS */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 14px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #10b981;
+            display: none;
+            z-index: 1000;
+            max-width: 350px;
+        }
+
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .notification-text {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .processing-status {
+            font-size: 14px;
+            color: #1f2937;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .progress-container {
+            max-width: 400px;
+            margin: 0 auto 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .processing-meta {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <h1>🎓 {{ college.name }} — Admin Dashboard</h1>
+            <p>{{ college.tagline }}</p>
+        </div>
+        <div class="header-right">
+            <a href="/" class="header-btn">← Back to Site</a>
+            <a href="#" onclick="testStudentView(event)" class="header-btn primary">👁 Preview Student View</a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Policies</div>
+                <div class="stat-value" id="statTotal">—</div>
+                <div class="stat-meta">Currently active</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Chats Today</div>
+                <div class="stat-value">47</div>
+                <div class="stat-meta">↑ 12% from yesterday</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Response</div>
+                <div class="stat-value">1.2s</div>
+                <div class="stat-meta">Fast & responsive</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Crisis Detected</div>
+                <div class="stat-value">3</div>
+                <div class="stat-meta">This week</div>
+            </div>
+        </div>
+
+        <!-- UPLOAD SECTION -->
+        <div class="upload-card">
+            <h2 class="section-title">📥 Add Policies from Documents</h2>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 20px;">
+                Drag any college document (PDF, DOCX, TXT) below. Our AI will read it and extract every policy
+                automatically. You review, then approve.
+            </p>
+
+            <div id="uploadZone" class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📄</div>
+                <div class="upload-title">Drop document here, or click to browse</div>
+                <div class="upload-subtitle">Handbooks, circulars, rule books — anything goes</div>
+                <div class="upload-hint">Supported: PDF, DOCX, TXT • Max 10MB</div>
+            </div>
+
+            <input type="file" id="fileInput" accept=".pdf,.docx,.txt" style="display:none"
+                onchange="handleFileSelect(event)">
+
+            <div id="processingState" class="processing hidden">
+                <div class="processing-spinner"></div>
+                <div class="processing-status" id="processingStatus">Reading document...</div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+
+                <div class="processing-meta" id="processingMeta"></div>
+            </div>
+        </div>
+
+        <!-- REVIEW SECTION (hidden until extraction) -->
+        <div id="reviewSection" class="review-section hidden">
+            <div class="review-header">
+                <h2 class="section-title">✨ Review Extracted Policies</h2>
+                <div class="review-meta">
+                    <strong id="reviewCount">0</strong> policies extracted from <span id="reviewFilename">file</span>
+                </div>
+            </div>
+
+            <div id="extractedPolicies"></div>
+
+            <div class="review-actions">
+                <button class="btn-secondary" onclick="cancelReview()">Cancel</button>
+                <button class="btn-primary" onclick="savePolicies()">✓ Approve & Add to Bot</button>
+            </div>
+        </div>
+
+        <!-- CURRENT POLICIES -->
+        <div class="current-policies">
+            <h2 class="section-title">📋 Active Policies</h2>
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 16px;">
+                These are the policies currently powering your bot.
+            </p>
+            <div id="currentPoliciesList"></div>
+        </div>
+
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div id="notification" class="notification">
+        <div class="notification-title" id="notifTitle">Success</div>
+        <div class="notification-text" id="notifText">Action completed</div>
+    </div>
+
+    <script>
+        const collegeId = "{{ college.id }}";
+        let currentExtractedPolicies = [];
+        let discardedIndexes = new Set();
+
+        // ─────────────────────────────────────────
+        // INITIAL LOAD
+        // ─────────────────────────────────────────
+
+        window.onload = function () {
+            loadCurrentPolicies();
+            setupDragAndDrop();
+        };
+
+        async function loadCurrentPolicies() {
+            try {
+                const response = await fetch(`/admin/${collegeId}/get_policies`);
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    const policies = data.policies;
+                    const keys = Object.keys(policies);
+                    document.getElementById("statTotal").textContent = keys.length;
+
+                    const list = document.getElementById("currentPoliciesList");
+                    if (keys.length === 0) {
+                        list.innerHTML = '<p style="color: #9ca3af; font-size: 13px;">No policies yet. Upload a document above to get started.</p>';
+                        return;
+                    }
+
+                    list.innerHTML = "";
+                    keys.forEach(key => {
+                        const policy = policies[key];
+                        const item = document.createElement("div");
+                        item.className = "policy-item";
+                        item.innerHTML = `
+                            <div>
+                                <div class="policy-item-title">${policy.title}</div>
+                                <div class="policy-item-meta">${policy.rules.length} rules • ${policy.category}</div>
+                            </div>
+                            <span class="category-badge category-${policy.category}">${policy.category}</span>
+                        `;
+                        list.appendChild(item);
+                    });
+                }
+            } catch (error) {
+                console.error("Failed to load policies:", error);
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // DRAG AND DROP
+        // ─────────────────────────────────────────
+
+        function setupDragAndDrop() {
+            const zone = document.getElementById("uploadZone");
+
+            zone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                zone.classList.add("dragging");
+            });
+
+            zone.addEventListener("dragleave", () => {
+                zone.classList.remove("dragging");
+            });
+
+            zone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                zone.classList.remove("dragging");
+                const file = e.dataTransfer.files[0];
+                if (file) uploadFile(file);
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) uploadFile(file);
+        }
+
+        // ─────────────────────────────────────────
+        // UPLOAD AND PROCESS
+        // ─────────────────────────────────────────
+
+        async function uploadFile(file) {
+            document.getElementById("uploadZone").classList.add("hidden");
+            document.getElementById("processingState").classList.remove("hidden");
+            document.getElementById("reviewSection").classList.add("hidden");
+
+            // Reset progress UI
+            document.getElementById("progressFill").style.width = "0%";
+            document.getElementById("progressText").textContent = "0%";
+            document.getElementById("processingStatus").textContent = "Uploading document...";
+            document.getElementById("processingMeta").textContent = "";
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch(`/admin/${collegeId}/upload_document`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Upload failed");
+                }
+
+                // Read the streaming response
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = "";
+                let finalData = null;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n\n");
+                    buffer = lines.pop(); // Keep incomplete line in buffer
+
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                handleProgressUpdate(data);
+                                if (data.type === "complete") {
+                                    finalData = data;
+                                }
+                            } catch (e) {
+                                console.error("Parse error:", e);
+                            }
+                        }
+                    }
+                }
+
+                // Done — show review
+                document.getElementById("processingState").classList.add("hidden");
+                document.getElementById("uploadZone").classList.remove("hidden");
+                document.getElementById("fileInput").value = "";
+
+                if (finalData && finalData.extracted_policies && finalData.extracted_policies.length > 0) {
+                    currentExtractedPolicies = finalData.extracted_policies;
+                    discardedIndexes.clear();
+                    showReview(finalData.filename, currentExtractedPolicies);
+                } else {
+                    showNotification("No policies found", "The AI couldn't extract policies. Try a clearer document.", true);
+                }
+
+            } catch (error) {
+                document.getElementById("processingState").classList.add("hidden");
+                document.getElementById("uploadZone").classList.remove("hidden");
+                showNotification("Error", "Upload failed. Try again.", true);
+            }
+        }
+
+        function handleProgressUpdate(data) {
+            const status = document.getElementById("processingStatus");
+            const fill = document.getElementById("progressFill");
+            const text = document.getElementById("progressText");
+            const meta = document.getElementById("processingMeta");
+
+            if (data.type === "start") {
+                status.textContent = "Reading document...";
+                meta.textContent = `${data.length} characters`;
+            }
+            else if (data.type === "chunking") {
+                status.textContent = `Splitting document into ${data.total_chunks} chunks...`;
+                fill.style.width = "5%";
+                text.textContent = "5%";
+            }
+            else if (data.type === "processing") {
+                const percent = Math.round((data.current / data.total) * 100);
+                status.textContent = `Analyzing chunk ${data.current} of ${data.total}...`;
+                fill.style.width = `${percent}%`;
+                text.textContent = `${percent}%`;
+                meta.textContent = `${data.policies_so_far} policies found so far`;
+            }
+            else if (data.type === "chunk_done") {
+                const percent = Math.round((data.current / data.total) * 100);
+                fill.style.width = `${percent}%`;
+                text.textContent = `${percent}%`;
+                meta.textContent = `${data.policies_so_far} policies found so far`;
+            }
+            else if (data.type === "waiting") {
+                status.textContent = `Waiting for rate limit (chunk ${data.current} done)...`;
+                meta.textContent = `${data.policies_so_far} policies found so far • respecting AI rate limits`;
+            }
+            else if (data.type === "complete") {
+                status.textContent = "Done!";
+                fill.style.width = "100%";
+                text.textContent = "100%";
+                meta.textContent = `${data.policy_count} total policies extracted`;
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // SAVE APPROVED POLICIES
+        // ─────────────────────────────────────────
+
+        async function savePolicies() {
+            const policiesToSave = currentExtractedPolicies.filter(
+                (_, index) => !discardedIndexes.has(index)
+            );
+
+            if (policiesToSave.length === 0) {
+                showNotification("No policies to save", "Restore at least one policy or cancel.", true);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/${collegeId}/save_policies`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ policies: policiesToSave })
+                });
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    showNotification("✓ Saved successfully", data.message, false);
+                    document.getElementById("reviewSection").classList.add("hidden");
+                    currentExtractedPolicies = [];
+                    discardedIndexes.clear();
+                    loadCurrentPolicies();
+                } else {
+                    showNotification("Save failed", data.message, true);
+                }
+            } catch (error) {
+                showNotification("Error", "Failed to save. Try again.", true);
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // NOTIFICATIONS
+        // ─────────────────────────────────────────
+
+        function showNotification(title, text, isError) {
+            const notif = document.getElementById("notification");
+            document.getElementById("notifTitle").textContent = title;
+            document.getElementById("notifText").textContent = text;
+            notif.classList.toggle("error", isError);
+            notif.style.display = "block";
+            setTimeout(() => notif.style.display = "none", 4000);
+        }
+
+        // ─────────────────────────────────────────
+        // PREVIEW STUDENT VIEW
+        // ─────────────────────────────────────────
+
+        function testStudentView(event) {
+            event.preventDefault();
+            window.open("/", "_blank");
+        }
+    </script>
+</body>
+
+</html>
