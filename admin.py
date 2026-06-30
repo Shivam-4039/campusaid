@@ -238,7 +238,24 @@ RULES:
 
             existing_policies = college_data.get("policies", {})
 
+            # Build a set of existing titles (lowercased for comparison)
+            existing_titles = {p["title"].lower().strip() for p in existing_policies.values()}
+
+            added_count = 0
+            skipped_count = 0
+            added_titles = []
+            skipped_titles = []
+
             for policy in new_policies:
+                policy_title_lower = policy["title"].lower().strip()
+
+                # Check if this policy title already exists
+                if policy_title_lower in existing_titles:
+                    skipped_count += 1
+                    skipped_titles.append(policy["title"])
+                    continue
+
+                # New policy — add it
                 base_key = policy["title"].lower().replace(" ", "_").replace("/", "_")
                 key = base_key
                 counter = 1
@@ -252,18 +269,38 @@ RULES:
                     "category": policy["category"],
                     "rules": policy["rules"]
                 }
+                existing_titles.add(policy_title_lower)
+                added_count += 1
+                added_titles.append(policy["title"])
 
             college_data["policies"] = existing_policies
 
-            with open(college_file, "w", encoding="utf-8") as f:
-                json.dump(college_data, f, indent=2, ensure_ascii=False)
+            # Only save to disk if we actually added something
+            if added_count > 0:
+                with open(college_file, "w", encoding="utf-8") as f:
+                    json.dump(college_data, f, indent=2, ensure_ascii=False)
 
-            COLLEGES[college_id] = college_data
-            SYSTEM_PROMPTS[college_id] = build_system_prompt(college_data)
+                COLLEGES[college_id] = college_data
+                SYSTEM_PROMPTS[college_id] = build_system_prompt(college_data)
+
+            # Build a clear message based on what happened
+            if added_count == 0 and skipped_count > 0:
+                message = f"All {skipped_count} policies already exist in {college_data['name']}. Nothing new to add."
+                status = "info"
+            elif added_count > 0 and skipped_count == 0:
+                message = f"Added {added_count} new policies to {college_data['name']}."
+                status = "success"
+            else:
+                message = f"Added {added_count} new policies, skipped {skipped_count} duplicates."
+                status = "success"
 
             return jsonify({
-                "status": "success",
-                "message": f"Added {len(new_policies)} policies to {college_data['name']}",
+                "status": status,
+                "message": message,
+                "added_count": added_count,
+                "skipped_count": skipped_count,
+                "added_titles": added_titles,
+                "skipped_titles": skipped_titles,
                 "total_policies": len(existing_policies)
             })
 
@@ -286,6 +323,44 @@ RULES:
             "college_name": college_data.get("name"),
             "policies": college_data.get("policies", {})
         })
+    # ─────────────────────────────────────────
+    # DELETE A POLICY
+    # ─────────────────────────────────────────
 
+    @app.route("/admin/<college_id>/delete_policy/<policy_key>", methods=["DELETE"])
+    def admin_delete_policy(college_id, policy_key):
+        if college_id not in COLLEGES:
+            return jsonify({"status": "error", "message": "College not found"}), 404
+
+        try:
+            college_file = f"colleges/{college_id}.json"
+            with open(college_file, "r", encoding="utf-8") as f:
+                college_data = json.load(f)
+
+            policies = college_data.get("policies", {})
+
+            if policy_key not in policies:
+                return jsonify({"status": "error", "message": "Policy not found"}), 404
+
+            deleted_title = policies[policy_key]["title"]
+            del policies[policy_key]
+
+            college_data["policies"] = policies
+
+            with open(college_file, "w", encoding="utf-8") as f:
+                json.dump(college_data, f, indent=2, ensure_ascii=False)
+
+            # Refresh in-memory data
+            COLLEGES[college_id] = college_data
+            SYSTEM_PROMPTS[college_id] = build_system_prompt(college_data)
+
+            return jsonify({
+                "status": "success",
+                "message": f"Deleted '{deleted_title}'",
+                "total_policies": len(policies)
+            })
+
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Delete error: {str(e)}"}), 500
 
     return app
