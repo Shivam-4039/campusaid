@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - {{ college.name }}</title>
+    <link rel="stylesheet" href="/static/design-system.css">
     <style>
         * {
             margin: 0;
@@ -576,6 +577,173 @@
             padding: 30px;
             font-size: 13px;
         }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--bg-subtle);
+            border-color: var(--border-strong);
+        }
+
+        /* Dark mode adjustments for admin */
+        [data-theme="dark"] body {
+            background: var(--bg-page);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .header {
+            background: var(--bg-card);
+            border-bottom-color: var(--border);
+        }
+
+        [data-theme="dark"] .header-left h1,
+        [data-theme="dark"] .header-left p {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .stat-card,
+        [data-theme="dark"] .upload-card,
+        [data-theme="dark"] .review-section,
+        [data-theme="dark"] .current-policies {
+            background: var(--bg-card);
+            border-color: var(--border);
+        }
+
+        [data-theme="dark"] .stat-value,
+        [data-theme="dark"] .section-title {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .stat-label,
+        [data-theme="dark"] .stat-meta {
+            color: var(--text-muted);
+        }
+
+        [data-theme="dark"] .upload-zone {
+            background: var(--bg-subtle);
+            border-color: var(--border-strong);
+        }
+
+        [data-theme="dark"] .upload-zone:hover,
+        [data-theme="dark"] .upload-zone.dragging {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .upload-title {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .policy-card {
+            background: var(--bg-subtle);
+            border-color: var(--border);
+        }
+
+        [data-theme="dark"] .policy-title,
+        [data-theme="dark"] .policy-item-title {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .policy-rules li {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .search-box,
+        [data-theme="dark"] .filter-chip {
+            background: var(--bg-card);
+            border-color: var(--border);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .filter-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        [data-theme="dark"] .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .header-btn {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        [data-theme="dark"] .header-btn:hover {
+            background: var(--border);
+        }
+
+        [data-theme="dark"] .header-btn.primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        [data-theme="dark"] .policy-item {
+            border-bottom-color: var(--border);
+        }
+
+        [data-theme="dark"] .policy-action-btn {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+
+        [data-theme="dark"] .policy-action-btn:hover {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background: var(--primary);
+        }
+
+        [data-theme="dark"] .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+
+        [data-theme="dark"] .notification {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .notification-title {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .notification-text {
+            color: var(--text-muted);
+        }
+
+        [data-theme="dark"] .processing-status {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .progress-bar {
+            background: var(--bg-subtle);
+        }
+
+        [data-theme="dark"] .no-results {
+            color: var(--text-muted);
+        }
     </style>
 </head>
 
@@ -587,6 +755,9 @@
             <p>{{ college.tagline }}</p>
         </div>
         <div class="header-right">
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle theme">
+                <span id="themeIcon">🌙</span>
+            </button>
             <a href="/" class="header-btn">← Back to Site</a>
             <a href="#" onclick="testStudentView(event)" class="header-btn primary">👁 Preview Student View</a>
         </div>
@@ -714,9 +885,36 @@
         // ─────────────────────────────────────────
 
         window.onload = function () {
+            initTheme();
             loadCurrentPolicies();
             setupDragAndDrop();
         };
+
+        // ─────────────────────────────────────────
+        // THEME TOGGLE
+        // ─────────────────────────────────────────
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem("campusaid_theme") || "light";
+            applyTheme(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+            const newTheme = currentTheme === "light" ? "dark" : "light";
+            applyTheme(newTheme);
+            localStorage.setItem("campusaid_theme", newTheme);
+        }
+
+        function applyTheme(theme) {
+            if (theme === "dark") {
+                document.documentElement.setAttribute("data-theme", "dark");
+                document.getElementById("themeIcon").textContent = "☀️";
+            } else {
+                document.documentElement.removeAttribute("data-theme");
+                document.getElementById("themeIcon").textContent = "🌙";
+            }
+        }
 
         let allPolicies = {};
         let activeFilters = new Set(["all"]);
