@@ -196,6 +196,8 @@ def chat():
     data = request.json
     user_message = data.get("message", "").strip()
     history = data.get("history", [])
+    # Clean history: keep only role + content (strip timestamps or other fields)
+    history = [{"role": m.get("role"), "content": m.get("content")} for m in history if m.get("role") and m.get("content")]
     document = data.get("document", None)
     college_id = data.get("college_id", DEFAULT_COLLEGE)
 

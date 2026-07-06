@@ -564,10 +564,7 @@
             </div>
 
             <div class="chat-messages" id="messages">
-                <div class="message bot">
-                    Hi! I'm CampusAid, your AI companion for ABC College. Ask me anything about exams, fees,
-                    scholarships, hostel, or just talk to me if you're feeling stressed. I'm here for you. 💙
-                </div>
+                <!-- Will be filled by renderMessages() -->
             </div>
 
             <!-- Document attachment chip (only shows when doc is uploaded) -->
@@ -591,11 +588,13 @@
 
     <script>
         // ─────────────────────────────────────────
-        // CHAT STATE MANAGEMENT (using localStorage)
+        // CHAT STATE MANAGEMENT
         // ─────────────────────────────────────────
 
         let chats = JSON.parse(localStorage.getItem("campusaid_chats") || "[]");
         let currentChatId = null;
+        let availableColleges = [];
+        let currentCollegeId = localStorage.getItem("campusaid_college") || "abc_college";
 
         function saveChats() {
             localStorage.setItem("campusaid_chats", JSON.stringify(chats));
@@ -610,7 +609,21 @@
         }
 
         // ─────────────────────────────────────────
-        // SIDEBAR RENDERING
+        // COLLEGES
+        // ─────────────────────────────────────────
+
+        async function loadColleges() {
+            try {
+                const response = await fetch("/colleges");
+                const data = await response.json();
+                availableColleges = data.colleges;
+            } catch (error) {
+                console.error("Failed to load colleges:", error);
+            }
+        }
+
+        // ─────────────────────────────────────────
+        // SIDEBAR
         // ─────────────────────────────────────────
 
         function renderSidebar() {
@@ -626,9 +639,9 @@
                 const item = document.createElement("div");
                 item.className = "chat-item" + (chat.id === currentChatId ? " active" : "");
                 item.innerHTML = `
-                    <div class="chat-title" onclick="loadChat('${chat.id}')">${chat.title}</div>
-                    <button class="delete-btn" onclick="deleteChat('${chat.id}', event)">🗑</button>
-                `;
+                <div class="chat-title" onclick="loadChat('${chat.id}')">${chat.title}</div>
+                <button class="delete-btn" onclick="deleteChat('${chat.id}', event)">🗑</button>
+            `;
                 list.appendChild(item);
             });
         }
@@ -666,7 +679,7 @@
             chats = chats.filter(c => c.id !== chatId);
 
             if (currentChatId === chatId) {
-                currentChatId = chats.length > 0 ? chats[0].id : null;
+                currentChatId = null;
             }
 
             saveChats();
@@ -685,41 +698,41 @@
 
             if (!chat || chat.messages.length === 0) {
                 messagesDiv.innerHTML = `
-        <div class="welcome-state">
-            <div class="welcome-icon">🎓</div>
-            <div class="welcome-title">Hey there! I'm CampusAid</div>
-            <div class="welcome-subtitle">Your AI companion for college life. Ask me about exams, fees, scholarships, or just talk to me if you're stressed. I'm here for you. 💙</div>
-        </div>
-        <div class="suggestions-container">
-            <div class="suggestions-title">Try one of these to get started:</div>
-            <div class="suggestions-grid">
-                <div class="suggestion-card" onclick="sendSuggestion('When is the fee deadline?')">
-                    <span class="suggestion-icon">📅</span>
-                    <span class="suggestion-text">When is the fee deadline?</span>
+                <div class="welcome-state">
+                    <div class="welcome-icon">🎓</div>
+                    <div class="welcome-title">Hey there! I'm CampusAid</div>
+                    <div class="welcome-subtitle">Your AI companion for college life. Ask me about exams, fees, scholarships, or just talk to me if you're stressed. I'm here for you. 💙</div>
                 </div>
-                <div class="suggestion-card" onclick="sendSuggestion('How do I apply for a scholarship?')">
-                    <span class="suggestion-icon">🎓</span>
-                    <span class="suggestion-text">How do I apply for a scholarship?</span>
+                <div class="suggestions-container">
+                    <div class="suggestions-title">Try one of these to get started:</div>
+                    <div class="suggestions-grid">
+                        <div class="suggestion-card" onclick="sendSuggestion('When is the fee deadline?')">
+                            <span class="suggestion-icon">📅</span>
+                            <span class="suggestion-text">When is the fee deadline?</span>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('How do I apply for a scholarship?')">
+                            <span class="suggestion-icon">🎓</span>
+                            <span class="suggestion-text">How do I apply for a scholarship?</span>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('What are the attendance rules?')">
+                            <span class="suggestion-icon">📊</span>
+                            <span class="suggestion-text">What are the attendance rules?</span>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('I am feeling stressed about my exams')">
+                            <span class="suggestion-icon">😓</span>
+                            <span class="suggestion-text">I'm stressed about my exams</span>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('Help me write a fee deferral letter')">
+                            <span class="suggestion-icon">✍️</span>
+                            <span class="suggestion-text">Help me write a fee deferral letter</span>
+                        </div>
+                        <div class="suggestion-card" onclick="sendSuggestion('What if I miss an internal exam due to illness?')">
+                            <span class="suggestion-icon">🏥</span>
+                            <span class="suggestion-text">Missed exam due to illness</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="suggestion-card" onclick="sendSuggestion('What are the attendance rules?')">
-                    <span class="suggestion-icon">📊</span>
-                    <span class="suggestion-text">What are the attendance rules?</span>
-                </div>
-                <div class="suggestion-card" onclick="sendSuggestion('I am feeling stressed about my exams')">
-                    <span class="suggestion-icon">😓</span>
-                    <span class="suggestion-text">I'm stressed about my exams</span>
-                </div>
-                <div class="suggestion-card" onclick="sendSuggestion('Help me write a fee deferral letter')">
-                    <span class="suggestion-icon">✍️</span>
-                    <span class="suggestion-text">Help me write a fee deferral letter</span>
-                </div>
-                <div class="suggestion-card" onclick="sendSuggestion('What if I miss an internal exam due to illness?')">
-                    <span class="suggestion-icon">🏥</span>
-                    <span class="suggestion-text">Missed exam due to illness</span>
-                </div>
-            </div>
-        </div>
-    `;
+            `;
                 return;
             }
 
@@ -768,22 +781,11 @@
         }
 
         function formatMessage(text) {
-            // Escape HTML to prevent injection
             text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-            // Convert markdown to HTML
-            // Bold: **text** → <strong>text</strong>
             text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-
-            // Italic: *text* → <em>text</em>
             text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>");
-
-            // Bullet points: - text → • text
             text = text.replace(/^- (.+)$/gm, "• $1");
-
-            // Line breaks
             text = text.replace(/\n/g, "<br>");
-
             return text;
         }
 
@@ -812,49 +814,58 @@
             const text = userInput.value.trim();
             if (!text) return;
 
-            // Create new chat if none active
             if (!currentChatId) {
                 createNewChat();
             }
 
             const chat = getCurrentChat();
+            if (!chat) return;
 
-            // If first message, generate AI title
             const isFirstMessage = chat.messages.length === 0;
+
             if (isFirstMessage) {
-                chat.title = "New Chat";
-                renderSidebar();
-                // Generate AI title in background
-                generateChatTitle(text, chat);
+                document.getElementById("messages").innerHTML = "";
             }
 
-            // Add user message
             const userTime = getCurrentTime();
             chat.messages.push({ role: "user", content: text, timestamp: userTime });
             addMessageToDOM(text, "user", userTime);
             saveChats();
+
+            if (isFirstMessage) {
+                chat.title = "New Chat";
+                renderSidebar();
+                generateChatTitle(text, chat);
+            }
 
             userInput.value = "";
             sendBtn.disabled = true;
             showTyping();
 
             try {
+                // Strip timestamps from history (Groq API only accepts role + content)
+                const cleanHistory = chat.messages.slice(0, -1).map(msg => ({
+                    role: msg.role,
+                    content: msg.content
+                }));
+
                 const response = await fetch("/chat", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         message: text,
-                        history: chat.messages.slice(0, -1),
-                        document: chat.document
+                        history: cleanHistory,
+                        document: chat.document,
+                        college_id: currentCollegeId
                     })
                 });
 
                 const data = await response.json();
                 removeTyping();
+
                 const botTime = getCurrentTime();
                 addMessageToDOM(data.reply, "bot", botTime);
 
-                // Save bot reply
                 chat.messages.push({ role: "assistant", content: data.reply, timestamp: botTime });
                 saveChats();
             } catch (error) {
@@ -865,6 +876,7 @@
             sendBtn.disabled = false;
             userInput.focus();
         }
+
         async function generateChatTitle(firstMessage, chat) {
             try {
                 const response = await fetch("/generate_title", {
@@ -877,7 +889,6 @@
                 saveChats();
                 renderSidebar();
             } catch (error) {
-                // Fall back to truncated message if title generation fails
                 chat.title = firstMessage.length > 30 ? firstMessage.substring(0, 30) + "..." : firstMessage;
                 saveChats();
                 renderSidebar();
@@ -897,12 +908,10 @@
             const file = fileInput.files[0];
             if (!file) return;
 
-            // Create new chat if none active
             if (!currentChatId) {
                 createNewChat();
             }
 
-            // Show loading state in chip
             const docChip = document.getElementById("docChip");
             const docChipName = document.getElementById("docChipName");
             docChipName.textContent = "Reading your document...";
@@ -929,8 +938,12 @@
 
                     docChipName.textContent = data.filename;
                     docChip.classList.remove("hidden");
-                    addMessageToDOM(data.message, "bot");
 
+                    if (chat.messages.length === 0) {
+                        document.getElementById("messages").innerHTML = "";
+                    }
+
+                    addMessageToDOM(data.message, "bot");
                     chat.messages.push({ role: "assistant", content: data.message });
                     saveChats();
                 } else {
@@ -969,9 +982,6 @@
         }
 
         // ─────────────────────────────────────────
-        // INITIALIZE ON PAGE LOAD
-        // ─────────────────────────────────────────
-        // ─────────────────────────────────────────
         // THEME TOGGLE
         // ─────────────────────────────────────────
 
@@ -998,6 +1008,11 @@
                 document.getElementById("themeLabel").textContent = "Dark mode";
             }
         }
+
+        // ─────────────────────────────────────────
+        // INIT
+        // ─────────────────────────────────────────
+
         window.onload = async function () {
             initTheme();
             currentChatId = null;
