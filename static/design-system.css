@@ -13,23 +13,23 @@
 }
 
 :root {
-    /* Colors */
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
-    --primary-light: #eef2ff;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
+    /* Deep blue primary (matches dark mode aesthetic) */
+    --primary: #1e40af;
+    --primary-hover: #1e3a8a;
+    --primary-light: #eff6ff;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
     --danger-light: #fef2f2;
 
-    /* Text */
-    --text-primary: #0f172a;
+    /* Text — softer than pure black */
+    --text-primary: #1e293b;
     --text-secondary: #475569;
     --text-muted: #64748b;
     --text-light: #94a3b8;
 
-    /* Backgrounds */
-    --bg-page: #f8fafc;
+    /* Backgrounds — subtle warm tint */
+    --bg-page: #fafbfc;
     --bg-card: #ffffff;
     --bg-subtle: #f1f5f9;
     --bg-hover: #f8fafc;
@@ -37,7 +37,16 @@
     /* Borders */
     --border: #e2e8f0;
     --border-strong: #cbd5e1;
-    --border-focus: #4f46e5;
+    --border-focus: #1e40af;
+
+    /* Sidebar (deep navy — matches primary vibe) */
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #ffffff;
+    --sidebar-text-muted: #cbd5e1;
+    --sidebar-text-dim: #64748b;
+    --sidebar-border: #334155;
+    --sidebar-border-strong: #475569;
+    --sidebar-hover: #334155;
 
     /* Category colors */
     --cat-academic-bg: #dbeafe;
@@ -49,11 +58,11 @@
     --cat-emotional-bg: #fce7f3;
     --cat-emotional-text: #9f1239;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-    --shadow-focus: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    /* Shadows — slightly stronger for depth */
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.12);
+    --shadow-focus: 0 0 0 3px rgba(30, 64, 175, 0.15);
 
     /* Radius */
     --radius-sm: 6px;
@@ -61,7 +70,7 @@
     --radius-lg: 12px;
     --radius-full: 999px;
 
-    /* Spacing (use these for consistency) */
+    /* Spacing */
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
@@ -83,29 +92,38 @@
    ═══════════════════════════════════════════ */
 
 [data-theme="dark"] {
-    /* Colors stay mostly the same, backgrounds/text flip */
-    --primary: #6366f1;
-    --primary-hover: #818cf8;
-    --primary-light: #1e1b4b;
+    /* Deep electric blue accent */
+    --primary: #3b82f6;
+    --primary-hover: #60a5fa;
+    --primary-light: #1e3a8a;
 
     /* Text */
-    --text-primary: #f1f5f9;
+    --text-primary: #f8fafc;
     --text-secondary: #cbd5e1;
     --text-muted: #94a3b8;
     --text-light: #64748b;
 
-    /* Backgrounds */
-    --bg-page: #0f172a;
-    --bg-card: #1e293b;
-    --bg-subtle: #334155;
-    --bg-hover: #334155;
+    /* Pitch black backgrounds */
+    --bg-page: #000000;
+    --bg-card: #0a0a0a;
+    --bg-subtle: #171717;
+    --bg-hover: #1a1a1a;
 
     /* Borders */
-    --border: #334155;
-    --border-strong: #475569;
-    --border-focus: #6366f1;
+    --border: #262626;
+    --border-strong: #404040;
+    --border-focus: #3b82f6;
 
-    /* Category colors (darker for dark mode) */
+    /* Sidebar (even blacker than main) */
+    --sidebar-bg: #000000;
+    --sidebar-text: #f8fafc;
+    --sidebar-text-muted: #cbd5e1;
+    --sidebar-text-dim: #52525b;
+    --sidebar-border: #171717;
+    --sidebar-border-strong: #262626;
+    --sidebar-hover: #0a0a0a;
+
+    /* Category colors (darker) */
     --cat-academic-bg: #1e3a8a;
     --cat-academic-text: #bfdbfe;
     --cat-financial-bg: #14532d;
@@ -115,13 +133,12 @@
     --cat-emotional-bg: #831843;
     --cat-emotional-text: #fbcfe8;
 
-    /* Shadows (subtle in dark mode) */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-focus: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+    --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.3);
 
-    /* Danger colors */
     --danger-light: #431a1a;
 }
 

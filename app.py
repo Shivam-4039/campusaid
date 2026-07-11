@@ -159,8 +159,15 @@ DEFAULT_COLLEGE = "abc_college"
 # Home page
 @app.route("/")
 def home():
+    return render_template("landing.html")
+
+@app.route("/chat")
+def chat_page():
     return render_template("index.html")
 
+@app.route("/admin")
+def admin_login_page():
+    return render_template("admin_login.html")
 # Chat endpoint
 # Generate a short title for a conversation
 @app.route("/generate_title", methods=["POST"])
@@ -318,4 +325,4 @@ register_admin_routes(
 # Run the app
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host="0.0.0.0", port=port)
+    app.run(debug=True, host="0.0.0.0", port=port)
